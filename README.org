@@ -1,0 +1,20 @@
+#+TITLE:Khepucraft
+
+* Startup Layout
+
+** -init
+
+Creates the GLFW window and the openGL context
+
+** -precompile-shaders
+
+Compiles the shaders ahead of time and stores them in a hashmap for future reference
+
+** -loop
+
+This is where all the rendering happens
+
+** -destruct
+
+Destroys the window, unbinds callbacks and gracefully shuts the game down.
+
