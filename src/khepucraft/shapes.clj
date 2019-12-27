@@ -1,6 +1,8 @@
 (ns khepucraft.shapes
   (:gen-class))
 
+                                        ; This triangle is officialy named: Trimester Anglesworth
+                                        ; By a friend, Elawn
 (def triangle  [-1 -1  0
                  1 -1  0
                  0  1  0])
@@ -13,28 +15,28 @@
   [f shape]
   (mapv f shape))
 
-(defn linear-scale
-  [scale shape]
-  (non-linear-scale #(* scale %) shape))
+(defn scale
+  [n shape]
+  (non-linear-scale #(* n %) shape))
 
 (defn split-triangles
   [indexes]
-  (vec (flatten (map #(take 3 (drop % indexes)) (range (- (count indexes) 2))))))
+  (vec (flatten (partition 3 1 indexes))))
 
 (defn index-shapes
-  "Use neanderthal for efficiency"
+  "TODO: Use neanderthal for efficiency"
   ([triangle]
    {:vertices triangle
     :indexes [0 1 2]})
   ([triangle & triangles]
    (let [triangles (conj triangles triangle)
          vertices (partition 3 (reduce concat triangles))
-        unique-vertices (vec (apply hash-set vertices))
-        indexes (split-triangles2 (range (count unique-vertices)))]
-    {:vertices (vec (flatten unique-vertices))
-     :indexes indexes})))
+         unique-vertices (vec (apply hash-set vertices))
+         indexes (split-triangles (range (count unique-vertices)))]
+     {:vertices (vec (flatten unique-vertices))
+      :indexes indexes})))
 
 ;; Composite shapes
 
-(def square (index-shapes right-triangle (linear-scale -1 right-triangle)))
+(def square (index-shapes right-triangle (scale -1 right-triangle)))
 
