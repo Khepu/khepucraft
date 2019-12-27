@@ -61,9 +61,9 @@
                                         ; Rendering commands
 
                                         ;shaders should only be compiled once in shaders and linked
-    (let [vs (compile-shader "./resources/triangle.vert" :vertex)
-          fs (compile-shader "./resources/triangle.frag" :fragment)]
-      (gl-load (linear-scale 0.75 triangle) (link-shaders vs fs)))
+    (let [vs (compile-shader "./resources/shaders/triangle.vert" :vertex)
+          fs (compile-shader "./resources/shaders/triangle.frag" :fragment)]
+      (gl-load (linear-scale 0.75 square) (link-shaders vs fs)))
 
                                         ; Check events and swap buffers
     (GLFW/glfwSwapBuffers window)
