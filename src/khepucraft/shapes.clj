@@ -36,6 +36,12 @@
      {:vertices (vec (flatten unique-vertices))
       :indexes indexes})))
 
+(def rotation-2d
+  [angle]
+  (let [cos (Math/cos angle)
+        sin (Math/sin angle)]
+    [cos ]))
+
 ;; Composite shapes
 
 (def square (index-shapes right-triangle (scale -1 right-triangle)))

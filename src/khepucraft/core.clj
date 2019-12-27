@@ -38,7 +38,7 @@
     window))
 
 (defn gl-load
-  [vertices shader-program]
+  [vertices shader-program unifroms]
   (let [vbo (GL46/glGenBuffers)
         vao (GL46/glGenVertexArrays)]
     (GL46/glBindVertexArray vao)
@@ -50,12 +50,23 @@
     (GL46/glEnableVertexAttribArray 0)
 
     (GL46/glUseProgram shader-program)
+
+                                        ;Uniforms
+
+    (GL46/glUniform1f (GL46/glGetUniformLocation shader-program "time") (unifroms "time"))
+    (GL46/glUniform3fv (GL46/glGetUniformLocation shader-program "move") (float-array (unifroms "move")))
+
     (GL46/glDrawArrays GL46/GL_TRIANGLES 0 (int (/ (count vertices) 3)))
     vbo))
 
+(defn link-shaders
+  [window]
+
+  window)
+
 (defn -loop
   [window]
-  (while (not (GLFW/glfwWindowShouldClose window))
+  (loop [time 0]
     (process-input window)
     (GL46/glClear (bit-or GL46/GL_COLOR_BUFFER_BIT
                           GL46/GL_DEPTH_BUFFER_BIT))
@@ -64,13 +75,20 @@
 
                                         ;TODO: shaders should only be compiled once in shaders and linked
     (let [vs (compile-shader "./resources/shaders/triangle.vert" :vertex)
-          fs (compile-shader "./resources/shaders/triangle.frag" :fragment)]
-      (gl-load (scale -1 (scale 0.75 triangle)) (link-shaders vs fs)))
+          fs (compile-shader "./resources/shaders/triangle.frag" :fragment)
+          uniforms {"time" time
+                    "move" [0 0 0]}]
+      (gl-load (scale 0.75 triangle) (link-shaders vs fs) uniforms))
+
 
                                         ; Check events and swap buffers
     (GLFW/glfwSwapBuffers window)
-    (GLFW/glfwPollEvents)) ;checks mouse and keyboard input
-  window)
+    (GLFW/glfwPollEvents)
+
+    ;might cause issues since it renders once after i press ESCAPE
+    (if (GLFW/glfwWindowShouldClose window)
+      window
+      (recur (inc time)))))
 
 (defn -destruct
   [window]
