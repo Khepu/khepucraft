@@ -4,7 +4,7 @@
    [org.lwjgl.opengl GL GL46])
   (:use
    [uncomplicate.neanderthal core native]
-   [khepucraft shaders shapes])
+   [khepucraft shaders shapes math])
   (:gen-class))
 
 (defn process-input
@@ -33,12 +33,16 @@
     (GLFW/glfwShowWindow window)
     (GL/createCapabilities)
     (GL46/glViewport 0 0 width height)
-    (GL46/glClearColor 0.2 0.3 0.3 1.)
+    (GL46/glClearColor 0.3 0.3 0.3 1.)
     (print window)
     window))
 
+(defn uniform-locations
+  [shader uniform-names]
+  (mapv #(GL46/glGetUniformLocation shader %) uniform-names))
+
 (defn gl-load
-  [vertices shader-program unifroms]
+  [vertices shader uniforms]
   (let [vbo (GL46/glGenBuffers)
         vao (GL46/glGenVertexArrays)]
     (GL46/glBindVertexArray vao)
@@ -49,20 +53,23 @@
     (GL46/glVertexAttribPointer 0 3 GL46/GL_FLOAT false 0 0)
     (GL46/glEnableVertexAttribArray 0)
 
-    (GL46/glUseProgram shader-program)
+    (GL46/glUseProgram shader)
 
                                         ;Uniforms
 
-    (GL46/glUniform1f (GL46/glGetUniformLocation shader-program "time") (unifroms "time"))
-    (GL46/glUniform3fv (GL46/glGetUniformLocation shader-program "move") (float-array (unifroms "move")))
+    (let [#_[time-loc
+           move-loc
+           rotation-loc] #_(uniform-locations shader-program (keys uniforms))
+          #_{:keys [t move rotation]} #_uniforms]
+      (GL46/glUniform1f (GL46/glGetUniformLocation shader "time") (uniforms "time"))
+      (GL46/glUniform3fv (GL46/glGetUniformLocation shader "move") (float-array (uniforms "move")))
+      (GL46/glUniformMatrix4fv (GL46/glGetUniformLocation shader "rotationz") false (uniforms "rotationz"))
+      (GL46/glUniformMatrix4fv (GL46/glGetUniformLocation shader "rotationx") false (uniforms "rotationx"))
+      (GL46/glUniformMatrix4fv (GL46/glGetUniformLocation shader "rotationy") false (uniforms "rotationy")))
+
 
     (GL46/glDrawArrays GL46/GL_TRIANGLES 0 (int (/ (count vertices) 3)))
     vbo))
-
-(defn link-shaders
-  [window]
-
-  window)
 
 (defn -loop
   [window]
@@ -76,10 +83,24 @@
                                         ;TODO: shaders should only be compiled once in shaders and linked
     (let [vs (compile-shader "./resources/shaders/triangle.vert" :vertex)
           fs (compile-shader "./resources/shaders/triangle.frag" :fragment)
+          t (/ time 100)
           uniforms {"time" time
-                    "move" [0 0 0]}]
-      (gl-load (scale 0.75 triangle) (link-shaders vs fs) uniforms))
+                    "move" [0 0 0]
+                    "rotationx" (-> (rotate-x t)
+                                    flatten
+                                    float-array)
+                    "rotationz" (-> (rotate-z t)
+                                   flatten
+                                   float-array)
+                    "rotationy" (-> (rotate-y t)
+                                    flatten
+                                    float-array)}]
 
+      #_(print "VS: " vs)
+      #_(print "FS: " fs)
+      (gl-load (scale 0.5 voxel)
+               (link-shaders vs fs)
+               uniforms))
 
                                         ; Check events and swap buffers
     (GLFW/glfwSwapBuffers window)
@@ -99,7 +120,7 @@
 
 (defn -run
   []
-  ((comp -destruct -loop) (-init 600 600)))
+  ((comp -destruct -loop) (-init 900 900)))
 
 (defn -main
   "Entry point"

@@ -1,5 +1,6 @@
 (ns khepucraft.shapes
-  (:gen-class))
+  (:use
+   [khepucraft math]))
 
                                         ; This triangle is officialy named: Trimester Anglesworth
                                         ; By a friend, Elawn
@@ -10,6 +11,43 @@
 (def right-triangle [ 1  1  0
                      -1  1  0
                       1 -1  0])
+
+(def voxel [ 1  1  0
+            -1  1  0
+             1 -1  0
+            -1 -1  0
+             1 -1  0
+            -1  1  0
+             1  1  1
+            -1  1  1
+             1 -1  1
+            -1 -1  1
+             1 -1  1
+            -1  1  1
+            -1 1 0
+            -1 1 1
+            -1 -1 1
+            -1 -1 1
+            -1 1 0
+            -1 -1 0
+            1 1 1
+            1 1 0
+            1 -1 1
+            1 1 0
+            1 -1 1
+            1 -1 0
+            -1 1 1
+            1 1 1
+            1 1 0
+            1 1 0
+            -1 1 1
+            -1 1 0
+            1 -1 1
+            -1 -1 1
+            1 -1 0
+            -1 -1 1
+            1 -1 0
+            -1 -1 0])
 
 (defn non-linear-scale
   [f shape]
@@ -36,13 +74,17 @@
      {:vertices (vec (flatten unique-vertices))
       :indexes indexes})))
 
-(def rotation-2d
-  [angle]
-  (let [cos (Math/cos angle)
-        sin (Math/sin angle)]
-    [cos ]))
-
 ;; Composite shapes
 
 (def square (index-shapes right-triangle (scale -1 right-triangle)))
+
+(defn generate-data
+  [f col]
+  (vec (flatten (mapv vector
+                      col
+                      (map f col)
+                      (take (count col) (repeat 0.))))))
+
+;;Rotation matrices
+
 

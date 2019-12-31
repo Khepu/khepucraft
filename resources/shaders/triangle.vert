@@ -4,13 +4,18 @@ layout (location = 0) in vec3 aPos;
 
 uniform float time;
 uniform vec3 move;
+uniform mat4 rotationz;
+uniform mat4 rotationy;
+uniform mat4 rotationx;
 
 out vec3 pos;
+out float t;
 
 void main() {
-  gl_Position = vec4(aPos.x + move.x,
-                     aPos.y + move.y,
-                     aPos.z + move.z,
-                     1.0);
-  pos = aPos.xyz;
+  vec4 paddedPos = vec4(aPos.xyz, 1.0f);
+  vec4 finalPos = rotationx * rotationz * rotationy * paddedPos;
+  gl_Position = finalPos;
+
+  pos = finalPos.xyz;
+  t = time;
 }
