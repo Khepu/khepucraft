@@ -12,6 +12,8 @@
                      -1  1  0
                       1 -1  0])
 
+                                        ;This voxel is officialy named: Voxelopoulos Papamichael
+                                        ; By a friend, bilkon
 (def voxel [ 1  1  0
             -1  1  0
              1 -1  0
@@ -61,30 +63,22 @@
   [indexes]
   (vec (flatten (partition 3 1 indexes))))
 
+(defn split-vertices
+  [vertices]
+  (partition 3 vertices))
+
 (defn index-shapes
-  "TODO: Use neanderthal for efficiency"
-  ([triangle]
-   {:vertices triangle
-    :indexes [0 1 2]})
-  ([triangle & triangles]
-   (let [triangles (conj triangles triangle)
-         vertices (partition 3 (reduce concat triangles))
-         unique-vertices (vec (apply hash-set vertices))
-         indexes (split-triangles (range (count unique-vertices)))]
-     {:vertices (vec (flatten unique-vertices))
-      :indexes indexes})))
+  [vertices]
+  (let [vertices (split-vertices vertices)
+        unique-vertices (vec (apply hash-set vertices))
+        indexes (split-triangles (range (count unique-vertices)))]
+
+    {:vertices (flatten unique-vertices)
+     :indices indexes}))
 
 ;; Composite shapes
 
-(def square (index-shapes right-triangle (scale -1 right-triangle)))
-
-(defn generate-data
-  [f col]
-  (vec (flatten (mapv vector
-                      col
-                      (map f col)
-                      (take (count col) (repeat 0.))))))
-
-;;Rotation matrices
-
+                                        ;This square is officialy named: Cubulous McQuad
+                                        ; By a friend, Elawn
+(def square (index-shapes (reduce conj right-triangle (scale -1 right-triangle))))
 

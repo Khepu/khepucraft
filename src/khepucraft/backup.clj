@@ -53,3 +53,43 @@
     (GL46/glDrawArrays GL46/GL_LINES 0 (int (/ (count points) 3)))
     vbo))
 
+
+
+#_(defn uniform-locations
+  [shader uniform-keys]
+  (mapv #(GL46/glGetUniformLocation shader (name %)) uniform-keys))
+
+#_(defn gl-load
+  "Currently this is called in the render loop, this means the vertices are sent to the GPU
+  at every loop, should only be sent once"
+  [vertices shader uniforms]
+
+  (let [vbo (GL46/glGenBuffers)
+        vao (GL46/glGenVertexArrays)]
+    (GL46/glBindVertexArray vao)
+
+    (GL46/glBindBuffer GL46/GL_ARRAY_BUFFER vbo)
+    (GL46/glBufferData GL46/GL_ARRAY_BUFFER (float-array vertices) GL46/GL_STATIC_DRAW)
+
+    (GL46/glVertexAttribPointer 0 3 GL46/GL_FLOAT false 0 0)
+    (GL46/glEnableVertexAttribArray 0)
+
+    (GL46/glUseProgram shader)
+
+                                        ;Uniforms
+
+    (let [[time-loc
+           move-loc
+           rotx-loc
+           roty-loc
+           rotz-loc] (uniform-locations shader (keys uniforms))
+          {:keys [time move rotx roty rotz]} uniforms]
+
+      (GL46/glUniform1f time-loc time)
+      (GL46/glUniform3fv move-loc move)
+      (GL46/glUniformMatrix4fv rotx-loc false rotx)
+      (GL46/glUniformMatrix4fv roty-loc false roty)
+      (GL46/glUniformMatrix4fv rotz-loc false rotz))
+
+    (GL46/glDrawArrays GL46/GL_TRIANGLES 0 (int (/ (count vertices) 3)))
+    vbo))
