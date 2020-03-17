@@ -32,13 +32,13 @@
     (GLFW/glfwMakeContextCurrent window)
     (GLFW/glfwSwapInterval 1) ;v-sync
     (GLFW/glfwShowWindow window)
+
     (GL/createCapabilities)
     (GL46/glViewport 0 0 width height)
     (GL46/glClearColor 0.3 0.3 0.3 1.)
     (GL46/glEnable GL46/GL_DEPTH_TEST)
-
-    (print window)
-
+    (GL46/glEnable GL46/GL_CULL_FACE)
+    (println window)
     window))
 
 (defn -loop
@@ -46,29 +46,30 @@
   (let [vs (compile-shader "./resources/shaders/triangle.vert" :vertex)
         fs (compile-shader "./resources/shaders/triangle.frag" :fragment)
         shader (link-shaders vs fs)
-        #_(tri (load-vertices (scale 0.5 voxel)))
-        tri (load-indexed (scale 0.5 voxel))]
-
+        tri (load-indexed voxel)]
+    (print (GL46/glGetError))
     (loop [time 0]
       (process-input window)
       (GL46/glClear (bit-or GL46/GL_COLOR_BUFFER_BIT
                             GL46/GL_DEPTH_BUFFER_BIT))
 
-                                        ; Rendering commands
+      ;;Rendering commands
       (let [t (/ time 100)
             uniforms `[(:f :time ~time)
                        (:f3 :move ~(float-array [0 0 0]))
                        (:mf4 :rotx ~(rotate-x t))
                        (:mf4 :roty ~(rotate-y t))
-                       (:mf4 :rotz ~(rotate-z t))]]
-        #_(draw-triangles tri shader uniforms)
+                       (:mf4 :rotz ~(rotate-z t))
+                       (:mf4 :perspective ~(perspective 90 1. 0.05 100.))
+                       (:mf4 :view ~(viewport))
+                       (:mf4 :transform ~(transform 0 0 -4 0.5 0.5 0.5))]]
         (draw-elements tri shader uniforms))
 
-                                        ; Check events and swap buffers
+      ;;Check events and swap buffers
     (GLFW/glfwSwapBuffers window)
     (GLFW/glfwPollEvents)
 
-    ;might cause issues since it renders once after i press ESCAPE
+    ;;might cause issues since it renders once after i press ESCAPE
     (if (GLFW/glfwWindowShouldClose window)
       window
       (recur (inc time))))))
@@ -78,7 +79,8 @@
   (Callbacks/glfwFreeCallbacks window)
   (GLFW/glfwDestroyWindow window)
   (GLFW/glfwTerminate)
-  (.free (GLFW/glfwSetErrorCallback nil)))
+  (.free (GLFW/glfwSetErrorCallback nil))
+  window)
 
 (defn -run
   []

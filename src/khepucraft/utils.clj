@@ -26,18 +26,13 @@
   [vertices]
   (let [vbo (GL46/glGenBuffers)
         vao (GL46/glGenVertexArrays)]
-                                        ;Bind buffers
     (GL46/glBindVertexArray vao)
 
     (GL46/glBindBuffer array-buffer vbo)
     (GL46/glBufferData array-buffer (float-array vertices) static-draw)
 
-    (GL46/glVertexAttribPointer 0 3 GL46/GL_FLOAT false 0 0)
+    (GL46/glVertexAttribPointer 0 3 GL46/GL_DOUBLE false 0 0)
     (GL46/glEnableVertexAttribArray 0)
-
-                                        ;Unbind buffers
-    #_(GL46/glBindBuffer GL46/GL_ARRAY_BUFFER 0)
-    #_(GL46/glBindVertexArray 0)
 
     {:vao vao
      :vertices (int (/ (count vertices) 3))}))
@@ -65,30 +60,33 @@
     (GL46/glDrawArrays triangles 0 vertices)))
 
 (defn load-indexed
-  [vertices]
-  (let [vao (GL46/glGenBuffers)
+  [[vertices indices]]
+  (let [vao (GL46/glGenVertexArrays)
         vbo (GL46/glGenBuffers)
-        ebo (GL46/glGenBuffers)
-        {:keys [vertices indices]} (index-shapes vertices)]
+        ebo (GL46/glGenBuffers)]
     (GL46/glBindVertexArray vao)
 
     (GL46/glBindBuffer array-buffer vbo)
     (GL46/glBufferData array-buffer (float-array vertices) static-draw)
-    (println "Vertices: " vertices)
-    (GL46/glBindBuffer element-array-buffer ebo)
-    (GL46/glBufferData element-array-buffer (float-array indices) static-draw)
-    (println "Indices: " indices)
+
     (GL46/glVertexAttribPointer 0 3 GL46/GL_FLOAT false 0 0)
     (GL46/glEnableVertexAttribArray 0)
 
+    (GL46/glBindBuffer element-array-buffer ebo)
+    (GL46/glBufferData element-array-buffer (int-array indices) static-draw)
+
     {:vao vao
+     :ebo ebo
      :indices (count indices)}))
 
 (defn draw-elements
   [buffers shader uniforms]
-  (let [{:keys [vao indices]} buffers]
+  (let [{:keys [vao
+                ebo
+                indices]} buffers]
     (GL46/glBindVertexArray vao)
+    (GL46/glBindBuffer element-array-buffer ebo)
     (GL46/glUseProgram shader)
     (apply-uniforms shader uniforms)
-    (GL46/glDrawElements triangles indices GL46/GL_UNSIGNED_BYTE 0)))
+    (GL46/glDrawElements triangles indices GL46/GL_UNSIGNED_INT 0)))
 
