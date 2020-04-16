@@ -2,16 +2,6 @@
   (:use
    [khepucraft math]))
 
-;;This triangle is officialy named: Trimester Anglesworth
-;;By a friend, Elawn
-(def triangle  [-1 -1  0
-                 1 -1  0
-                 0  1  0])
-
-(def right-triangle [ 1  1  0
-                     -1  1  0
-                      1 -1  0])
-
 ;;This voxel is officialy named: Voxelopoulos Papamichael
 ;;By a friend, bilkon
 (def voxel [[-1.0 -1.0  1.0
@@ -40,51 +30,6 @@
 		          3 2 6
 		          6 7 3]])
 
-(def voxelb[ 1  1 -1
-            -1  1 -1
-             1 -1 -1
-            -1 -1 -1
-             1 -1 -1
-            -1  1 -1
-             1  1  1
-            -1  1  1
-             1 -1  1
-            -1 -1  1
-             1 -1  1
-            -1  1  1
-            -1  1 -1
-            -1  1  1
-            -1 -1  1
-            -1 -1  1
-            -1  1 -1
-            -1 -1 -1
-             1  1  1
-             1  1 -1
-             1 -1  1
-             1  1 -1
-             1 -1  1
-             1 -1 -1
-            -1  1  1
-             1  1  1
-             1  1 -1
-             1  1 -1
-            -1  1  1
-            -1  1 -1
-             1 -1  1
-            -1 -1  1
-             1 -1 -1
-            -1 -1  1
-             1 -1 -1
-            -1 -1 -1])
-
-(defn non-linear-scale
-  [f shape]
-  (mapv f shape))
-
-(defn scale
-  [n shape]
-  (non-linear-scale #(* n %) shape))
-
 (defn index-shape
   [vertices]
   (let [grouped-vertices (partition 3 vertices)
@@ -98,9 +43,4 @@
 (defn combine-shapes
   [& shapes]
   (apply concat shapes))
-                                        ; Composite shapes
-
-;;This square is officialy named: Cubulous McQuad
-;;By a friend, Elawn
-(def square (index-shape (combine-shapes right-triangle (scale -1 right-triangle))))
 

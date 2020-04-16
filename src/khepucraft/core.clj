@@ -4,7 +4,7 @@
    [org.lwjgl.opengl GL GL46])
   (:use
    [uncomplicate.neanderthal core native]
-   [khepucraft shaders shapes math utils])
+   [khepucraft shaders shapes math utils camera])
   (:gen-class))
 
 (defn process-input
@@ -35,6 +35,7 @@
 
     (GL/createCapabilities)
     (GL46/glViewport 0 0 width height)
+
     (GL46/glClearColor 0.3 0.3 0.3 1.)
     (GL46/glEnable GL46/GL_DEPTH_TEST)
     (GL46/glEnable GL46/GL_CULL_FACE)
@@ -46,24 +47,26 @@
   (let [vs (compile-shader "./resources/shaders/triangle.vert" :vertex)
         fs (compile-shader "./resources/shaders/triangle.frag" :fragment)
         shader (link-shaders vs fs)
-        tri (load-indexed voxel)]
-    (print (GL46/glGetError))
-    (loop [time 0]
+        vox (load-indexed voxel)]
+
+    (loop []
       (process-input window)
       (GL46/glClear (bit-or GL46/GL_COLOR_BUFFER_BIT
                             GL46/GL_DEPTH_BUFFER_BIT))
 
       ;;Rendering commands
-      (let [t (/ time 100)
+      (let [time (GLFW/glfwGetTime)
+            t (/ time 5)
+            camera (look [0 0 3] [1 1 0] [0 1 0])
             uniforms `[(:f :time ~time)
-                       (:f3 :move ~(float-array [0 0 0]))
                        (:mf4 :rotx ~(rotate-x t))
                        (:mf4 :roty ~(rotate-y t))
                        (:mf4 :rotz ~(rotate-z t))
                        (:mf4 :perspective ~(perspective 90 1. 0.05 100.))
-                       (:mf4 :view ~(viewport))
-                       (:mf4 :transform ~(transform 0 0 -4 0.5 0.5 0.5))]]
-        (draw-elements tri shader uniforms))
+                       (:mf4 :transform ~(transform 0 0 -0.5 1 1 1))
+                       (:mf4 :view ~(float-array (first camera)))
+                       (:mf4 :cameraPos ~(float-array (second camera)))]]
+        (draw-elements vox shader uniforms))
 
       ;;Check events and swap buffers
     (GLFW/glfwSwapBuffers window)
@@ -72,7 +75,7 @@
     ;;might cause issues since it renders once after i press ESCAPE
     (if (GLFW/glfwWindowShouldClose window)
       window
-      (recur (inc time))))))
+      (recur)))))
 
 (defn -destruct
   [window]

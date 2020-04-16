@@ -1,0 +1,2 @@
+{:controls {:up w, :down s, :left a, :right s},
+ :graphics {:resolution [1920 1080]}}
