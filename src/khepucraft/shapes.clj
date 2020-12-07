@@ -2,8 +2,6 @@
   (:use
    [khepucraft math]))
 
-;;This voxel is officialy named: Voxelopoulos Papamichael
-;;By a friend, bilkon
 (def voxel [[-1.0 -1.0  1.0
                1.0 -1.0  1.0
                1.0  1.0  1.0
